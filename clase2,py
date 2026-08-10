@@ -1,0 +1,20 @@
+class Persona:
+    def __init__(self, nombre, edad):
+        self.nombre = nombre
+        self.edad = edad
+
+    def saludar(self):
+        return f"Hola, soy {self.nombre}"
+
+    def cumplir_años(self):
+        self.edad += 1
+
+
+# Uso
+p = Persona("Diego", 30)
+
+print(p.saludar())
+print(p.edad)
+
+p.cumplir_años()
+print(p.edad)
