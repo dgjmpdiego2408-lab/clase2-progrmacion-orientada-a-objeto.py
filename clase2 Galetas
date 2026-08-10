@@ -1,0 +1,21 @@
+class Galleta:
+    def __init__(self, sabor, color):
+        self.sabor = sabor
+        self.color =  color
+
+
+# Crear dos objetos (instancias)
+galleta_1 = Galleta("Chocolate", "Café")
+galleta_2 = Galleta("Vainilla", "Blanca")
+
+# Mostrar los datos
+print("Galleta 1:")
+print("Sabor:", galleta_1.sabor)
+print("Color:", galleta_1.color)
+
+print("\nGalleta 2:")
+print("Sabor:", galleta_2.sabor)
+print("Color:", galleta_2.color)
+
+# Comprobar identidad
+print("\n¿Son el mismo objeto?", galleta_1 is galleta_2)
