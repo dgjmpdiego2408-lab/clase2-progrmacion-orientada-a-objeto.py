@@ -1,0 +1,327 @@
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+class HabitacionHotel
+{
+    private int numero;
+    private string tipo;
+    private double precio;
+    private bool disponible;
+    private string huesped;
+
+    public int Numero
+    {
+        get { return numero; }
+    }
+
+    public double Precio
+    {
+        get { return precio; }
+    }
+
+    public bool Disponible
+    {
+        get { return disponible; }
+    }
+
+    public HabitacionHotel(int num, string clase, double valor)
+    {
+        numero = num;
+        tipo = clase;
+        precio = valor;
+        disponible = true;
+        huesped = "";
+    }
+
+    public double Reservar(string cliente, int cantidadNoches)
+    {
+        if (disponible && !string.IsNullOrWhiteSpace(cliente) && cantidadNoches > 0)
+        {
+            huesped = cliente;
+            disponible = false;
+
+            return precio * cantidadNoches;
+        }
+
+        return -1;
+    }
+
+    public bool LiberarHabitacion()
+    {
+        if (disponible == false)
+        {
+            disponible = true;
+            huesped = "";
+            return true;
+        }
+
+        return false;
+    }
+
+    public void AplicarDescuento(int porcentaje)
+    {
+        if (porcentaje >= 0 && porcentaje < 100)
+        {
+            double descuento = precio * porcentaje / 100.0;
+            double resultado = precio - descuento;
+
+            if (resultado > 0)
+            {
+                precio = resultado;
+                Console.WriteLine("Descuento aplicado correctamente.");
+            }
+            else
+            {
+                Console.WriteLine("El precio debe ser mayor que cero.");
+            }
+        }
+        else
+        {
+            Console.WriteLine("Porcentaje de descuento incorrecto.");
+        }
+    }
+
+    public string ObtenerDatosResumen()
+    {
+        string estado;
+
+        if (disponible)
+        {
+            estado = "Libre";
+        }
+        else
+        {
+            estado = "Ocupada por " + huesped;
+        }
+
+        return "Habitación " + numero + " | " + tipo +
+               " | $" + precio.ToString("N0") + " | " + estado;
+    }
+
+    public string MostrarInformacion()
+    {
+        return "Número: " + numero +
+               "\nTipo: " + tipo +
+               "\nPrecio por noche: $" + precio.ToString("N0") +
+               "\nDisponibilidad: " + (disponible ? "Libre" : "Ocupada") +
+               (!disponible ? "\nHuésped: " + huesped : "");
+    }
+}
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        Console.OutputEncoding = Encoding.UTF8;
+
+        List<HabitacionHotel> listaHabitaciones =
+            new List<HabitacionHotel>();
+
+        listaHabitaciones.Add(new HabitacionHotel(110, "Individual", 60000));
+        listaHabitaciones.Add(new HabitacionHotel(205, "Doble", 90000));
+        listaHabitaciones.Add(new HabitacionHotel(310, "Suite", 170000));
+
+        int opcion = 0;
+
+        while (opcion != 5)
+        {
+            Console.WriteLine("\n====== HOTEL SISTEMA ======");
+            Console.WriteLine("1. Consultar habitaciones");
+            Console.WriteLine("2. Registrar reserva");
+            Console.WriteLine("3. Liberar habitación");
+            Console.WriteLine("4. Aplicar descuento");
+            Console.WriteLine("5. Finalizar programa");
+            Console.Write("Elija una opción: ");
+
+            if (!int.TryParse(Console.ReadLine(), out opcion))
+            {
+                Console.WriteLine("Debe ingresar un número.");
+                opcion = 0;
+                continue;
+            }
+
+            switch (opcion)
+            {
+                case 1:
+                    Console.WriteLine("\n--- LISTADO DE HABITACIONES ---");
+
+                    foreach (HabitacionHotel habitacion in listaHabitaciones)
+                    {
+                        Console.WriteLine(habitacion.MostrarInformacion());
+                        Console.WriteLine("-------------------------");
+                    }
+                    break;
+
+                case 2:
+                    Console.Write("Número de habitación: ");
+
+                    if (!int.TryParse(Console.ReadLine(), out int numeroReserva))
+                    {
+                        Console.WriteLine("Número incorrecto.");
+                        break;
+                    }
+
+                    HabitacionHotel encontrada =
+                        Buscar(listaHabitaciones, numeroReserva);
+
+                    if (encontrada != null)
+                    {
+                        Console.Write("Nombre del huésped: ");
+                        string nombre = Console.ReadLine();
+
+                        Console.Write("Número de noches: ");
+
+                        if (!int.TryParse(Console.ReadLine(), out int noches))
+                        {
+                            Console.WriteLine("Cantidad de noches incorrecta.");
+                            break;
+                        }
+
+                        double total = encontrada.Reservar(nombre, noches);
+
+                        if (total > 0)
+                        {
+                            Console.WriteLine("Reserva registrada.");
+                            Console.WriteLine("Valor a pagar: $" + total.ToString("N0"));
+                        }
+                        else
+                        {
+                            Console.WriteLine("No fue posible reservar la habitación.");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("No existe esa habitación.");
+                    }
+                    break;
+
+                case 3:
+                    Console.Write("Número de habitación que desea liberar: ");
+
+                    if (!int.TryParse(Console.ReadLine(), out int numeroLiberar))
+                    {
+                        Console.WriteLine("Número incorrecto.");
+                        break;
+                    }
+
+                    HabitacionHotel habitacionLibre =
+                        Buscar(listaHabitaciones, numeroLiberar);
+
+                    if (habitacionLibre != null)
+                    {
+                        if (habitacionLibre.LiberarHabitacion())
+                        {
+                            Console.WriteLine("Habitación liberada exitosamente.");
+                        }
+                        else
+                        {
+                            Console.WriteLine("La habitación ya se encontraba libre.");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Habitación no encontrada.");
+                    }
+                    break;
+
+                case 4:
+                    Console.Write("Número de habitación: ");
+
+                    if (!int.TryParse(Console.ReadLine(), out int numeroDescuento))
+                    {
+                        Console.WriteLine("Número incorrecto.");
+                        break;
+                    }
+
+                    HabitacionHotel habitacionPrecio =
+                        Buscar(listaHabitaciones, numeroDescuento);
+
+                    if (habitacionPrecio != null)
+                    {
+                        Console.Write("Porcentaje de descuento: ");
+
+                        if (!int.TryParse(Console.ReadLine(), out int porcentaje))
+                        {
+                            Console.WriteLine("Porcentaje incorrecto.");
+                            break;
+                        }
+
+                        habitacionPrecio.AplicarDescuento(porcentaje);
+
+                        Console.WriteLine("Precio actual: $" +
+                            habitacionPrecio.Precio.ToString("N0"));
+                    }
+                    else
+                    {
+                        Console.WriteLine("Habitación no encontrada.");
+                    }
+                    break;
+
+                case 5:
+                    Console.WriteLine("Cerrando el sistema...");
+                    break;
+
+                default:
+                    Console.WriteLine("Seleccione una opción del menú.");
+                    break;
+            }
+        }
+
+        // CALCULO DE METRICAS FINALES
+
+        int cantidadLibres = 0;
+        int cantidadOcupadas = 0;
+        double acumuladoPrecios = 0;
+
+        foreach (HabitacionHotel habitacion in listaHabitaciones)
+        {
+            if (habitacion.Disponible)
+            {
+                cantidadLibres++;
+            }
+            else
+            {
+                cantidadOcupadas++;
+            }
+
+            acumuladoPrecios += habitacion.Precio;
+        }
+
+        double promedio = acumuladoPrecios / listaHabitaciones.Count;
+
+        Console.WriteLine("\n====== INFORME FINAL ======");
+
+        Console.WriteLine("Habitaciones registradas: " + listaHabitaciones.Count);
+        Console.WriteLine("Habitaciones libres: " + cantidadLibres);
+        Console.WriteLine("Habitaciones ocupadas: " + cantidadOcupadas);
+
+        Console.WriteLine("Promedio de precios: $" +
+                          promedio.ToString("N0"));
+
+        Console.WriteLine("\n====== RESUMEN GENERAL ======");
+
+        foreach (HabitacionHotel habitacion in listaHabitaciones)
+        {
+            Console.WriteLine(habitacion.ObtenerDatosResumen());
+        }
+
+        Console.WriteLine("\nPrograma finalizado.");
+    }
+
+    // BUSCAR UNA HABITACION
+
+    static HabitacionHotel Buscar(
+        List<HabitacionHotel> habitaciones, int numero)
+    {
+        foreach (HabitacionHotel h in habitaciones)
+        {
+            if (h.Numero == numero)
+            {
+                return h;
+            }
+        }
+
+        return null;
+    }
+}
